@@ -13,8 +13,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script src="../../node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
   <script src="wct-browser-config.js"></script>
   <script src="../../node_modules/wct-browser-legacy/browser.js"></script>
-  <script type="module" src="../../polymer-legacy.js"></script>
-  <script type="module" src="../../lib/mixins/dir-mixin.js"></script>
 </head>
 <body>
   <!--
@@ -114,6 +112,28 @@ Polymer({is: 'x-dir-legacy'});
 </script>
   </dom-module>
 
+  <dom-module id="dir-built">
+    <template css-build="shadow">
+      <style>
+         :host(:dir(rtl)), :host([dir="rtl"]) {
+          border: 10px solid black;
+        }
+        div:dir(rtl), :host([dir="rtl"]) div {
+          background-color: rgb(123, 123, 123);
+        }
+      </style>
+      <div id="div"></div>
+    </template>
+    <script type="module">
+      import { DirMixin } from '../../lib/mixins/dir-mixin.js';
+      import { PolymerElement } from '../../polymer-element.js';
+      class DirBuilt extends DirMixin(PolymerElement) {
+        static get is() {return 'dir-built';}
+      }
+      customElements.define(DirBuilt.is, DirBuilt);
+    </script>
+  </dom-module>
+
   <test-fixture id="dir">
     <template>
       <x-dir></x-dir>
@@ -129,6 +149,12 @@ Polymer({is: 'x-dir-legacy'});
   <test-fixture id="legacy">
     <template>
       <x-dir-legacy></x-dir-legacy>
+    </template>
+  </test-fixture>
+
+  <test-fixture id="built">
+    <template>
+      <dir-built></dir-built>
     </template>
   </test-fixture>
 
@@ -252,6 +278,15 @@ suite(':dir', function() {
     assertComputed(el.$.indirect, '9px');
     assertComputed(el.$.other, '8px');
     assertComputed(el.firstElementChild, '7px');
+  });
+
+  test('css-build of :dir', function() {
+    let el = fixture('built');
+    assertComputed(el, '10px');
+    assertComputed(el.$.div, 'rgb(123, 123, 123)', 'background-color');
+    if (window.ShadyCSS && !window.ShadyCSS.nativeShadow) {
+      assert.notOk(el.constructor.__activateDir);
+    }
   });
 });
 </script>
